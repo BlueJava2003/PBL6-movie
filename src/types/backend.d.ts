@@ -107,4 +107,10 @@ declare global {
     };
     seats: ISeat[];
   }
+
+  interface IListCategory {
+    id: number;
+    name: string;
+    desc: string;
+  }
 }
