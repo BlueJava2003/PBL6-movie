@@ -100,8 +100,7 @@ const MovieList = () => {
               setStateMovie("today");
             }}
             style={{
-              borderBottom:
-                stateMovie === "today" ? "3px solid #E50914" : "none",
+              borderBottom: stateMovie === "today" ? "3px solid #E50914" : "none",
             }}
           >
             phim đang chiếu
@@ -112,8 +111,7 @@ const MovieList = () => {
               setStateMovie("upcoming");
             }}
             style={{
-              borderBottom:
-                stateMovie === "upcoming" ? "3px solid #E50914" : "none",
+              borderBottom: stateMovie === "upcoming" ? "3px solid #E50914" : "none",
             }}
           >
             phim sắp chiếu
