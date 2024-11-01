@@ -123,7 +123,6 @@
 // };
 
 // export default RoomList;
-
 "use client";
 import { useEffect, useState } from "react";
 import { Empty, Spin, Button, notification } from "antd";
