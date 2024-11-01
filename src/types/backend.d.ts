@@ -107,4 +107,38 @@ declare global {
     };
     seats: ISeat[];
   }
+
+  interface IListRoom {
+    id: number; 
+    name: string; 
+    capacity: string;  
+  }
+
+  interface IRoomState {
+    id: number;
+    schedule: ISchedule[]; //
+    room: IListRoom;
+    availableSeat: number;
+    unavailableSeat: number;
+  }
+
+  interface IRoomDetail {
+    room: IRoom;
+  }
+
+  interface IBooking {
+    id: number;
+    state: string;
+    accountID: number;
+    schedule: ISchedule;
+    isDeleted: boolean;
+    seatBooked: {
+    room: {
+      id: number;
+      roomName: string;
+    };
+    seats: ISeat;
+  }
+    totalPrice: number;
+  }
 }
