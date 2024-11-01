@@ -140,5 +140,10 @@ declare global {
     seats: ISeat;
   }
     totalPrice: number;
+    
+  interface IListCategory {
+    id: number;
+    name: string;
+    desc: string;
   }
 }
