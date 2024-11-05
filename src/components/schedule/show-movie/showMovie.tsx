@@ -1,7 +1,7 @@
-import { useUserContext } from '@/lib/user.wrapper';
-import { useCookies } from 'next-client-cookies';
-import Link from 'next/link';
-import { redirect, useRouter } from 'next/navigation';
+import { useUserContext } from "@/lib/user.wrapper";
+import { useCookies } from "next-client-cookies";
+import Link from "next/link";
+import { redirect, useRouter } from "next/navigation";
 
 interface IShowTime {
   date: string;
@@ -22,18 +22,18 @@ interface Iprops {
 }
 
 const ShowMovie = ({ showMovie }: Iprops) => {
-  console.log('🚀 ~ ShowMovie ~ showMovie:', showMovie);
+  console.log("🚀 ~ ShowMovie ~ showMovie:", showMovie);
   const cookies = useCookies();
-  const accessToken = cookies.get('accessToken');
+  const accessToken = cookies.get("accessToken");
   const router = useRouter();
   const { infoBooking, setInfoBooking } = useUserContext() as IBookingContext;
 
   const handleSchedule = (showTime: any) => {
-    localStorage.setItem('scheduleId', JSON.stringify(showTime.id));
+    localStorage.setItem("scheduleId", JSON.stringify(showTime.id));
     if (!accessToken) {
-      return router.push('/auth/login');
+      return router.push("/auth/login");
     }
-    localStorage.removeItem('infoBooking');
+    localStorage.removeItem("infoBooking");
     setInfoBooking({
       seatIds: [],
       seatNames: [],
@@ -44,17 +44,11 @@ const ShowMovie = ({ showMovie }: Iprops) => {
 
   return (
     <div className="md:mx-[85px] mx-[50px] mb-8">
-      <h3 className="text-base truncate font-bold uppercase text-[#0E1D2F] pt-4 pb-5">
-        {showMovie.name}
-      </h3>
+      <h3 className="text-base truncate font-bold uppercase text-[#0E1D2F] pt-4 pb-5">{showMovie.name}</h3>
       <div className="md:flex pl-4">
         {/* <img src={showMovie.imagePath} className="w-[117px] h-[166px] mr-16" alt=""></img> */}
         <div className="w-[117px] h-[166px] mr-16">
-          <img
-            className="w-full h-full bg-cover object-cover"
-            src={showMovie.imagePath}
-            alt=""
-          />
+          <img className="w-full h-full bg-cover object-cover" src={showMovie.imagePath} alt="" />
         </div>
         <div className="md:h-1/2 md:flex grid grid-cols-2">
           {showMovie.schedule.map((showTime) => (
@@ -65,8 +59,8 @@ const ShowMovie = ({ showMovie }: Iprops) => {
                 </div>
                 <div className="border border-t-0 border-solid border-[#e5e5e5]  px-3 text-center whitespace-nowrap">
                   <p>Phòng chiếu</p>
-                  {/* <p>{showTime.room.roomName}</p> */}
-                  <p>01</p>
+                  <p>{showTime.id}</p>
+                  {/* <p>01</p> */}
                 </div>
               </div>
             </div>

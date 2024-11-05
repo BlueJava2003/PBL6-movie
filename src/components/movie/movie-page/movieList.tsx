@@ -24,7 +24,7 @@ interface Iprops {
 const MovieList = () => {
   const [listMovies, setListMovies] = useState<IListMovie[]>([]);
   console.log("🚀 ~ MovieList ~ listMovies:", listMovies);
-  const [stateMovie, setStateMovie] = useState("today");
+  const [stateMovie, setStateMovie] = useState("today | upcoming");
   const [searchValue, setSearchValue] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
