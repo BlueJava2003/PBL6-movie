@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,39 +15,6 @@ import * as z from "zod";
 import { sendRequest } from "@/utils/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { parseCookies } from "nookies";
-
-interface IListMovie {
-  id: number;
-  name: string;
-  imagePath: string;
-  desc: string;
-  duration: number;
-  releaseDate: string;
-  director: string;
-  actor: string;
-  language: string;
-  category: {
-    id: number;
-    name: string;
-  };
-  urlTrailer: string;
-}
-
-interface IListCategory {
-  id: number;
-  name: string;
-}
-
-interface IBackendRes<T> {
-  data: T;
-  message: string;
-}
-
-interface IMovieAttachment {
-  id: number;
-  title: string;
-  // Add other relevant fields
-}
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -62,7 +29,7 @@ const formSchema = z.object({
   file: z.instanceof(File).optional(),
 });
 
-export default function Component() {
+export default function AdminMovieList() {
   const [movies, setMovies] = useState<IListMovie[]>([]);
   const [categories, setCategories] = useState<IListCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,12 +38,6 @@ export default function Component() {
   const [editingMovie, setEditingMovie] = useState<IListMovie | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ title: string; message: string; isError: boolean } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [searchResults, setSearchResults] = useState<IMovieAttachment[]>([]);
-  const [isSearchMode, setIsSearchMode] = useState(false); // Added state for search mode
-  const itemsPerPage = 5;
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -96,33 +57,25 @@ export default function Component() {
   });
 
   useEffect(() => {
-    fetchMovies(isSearchMode); // Updated useEffect to call fetchMovies with isSearchMode
+    fetchMovies();
     fetchCategories();
-  }, [currentPage, isSearchMode]); // Added isSearchMode to the dependency array
+  }, []);
 
-  const fetchMovies = async (isSearch: boolean = false) => {
+  const fetchMovies = async () => {
     try {
       setIsLoading(true);
-      const url = isSearch
-        ? `${process.env.customURL}/movie/searchMovie`
-        : `${process.env.customURL}/movie/getAllMovie`;
-      const method = isSearch ? "POST" : "GET";
-      const body = isSearch ? { name: searchValue } : undefined;
-
       const res = await sendRequest<IBackendRes<any>>({
-        url,
-        method,
-        body,
+        url: `${process.env.customURL}/movie/getAllMovie`,
+        method: "GET",
         queryParams: {
-          page: currentPage,
-          limit: itemsPerPage,
+          page: 3,
+          limit: 10,
         },
       });
 
       if (res.data) {
         setMovies(res.data.slice(0, res.data.length - 1));
-        setTotalItems(res.data[res.data.length - 1].total);
-        setTotalPages(Math.ceil(res.data[res.data.length - 1].total / itemsPerPage));
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Failed to fetch movies:", error);
@@ -148,15 +101,8 @@ export default function Component() {
     }
   };
 
-  const handleSearch = async () => {
-    if (searchValue.trim()) {
-      setIsSearchMode(true);
-      setCurrentPage(1);
-      await fetchMovies(true);
-    } else {
-      setIsSearchMode(false);
-      await fetchMovies(false);
-    }
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
   };
 
   const handleAdd = () => {
@@ -173,7 +119,6 @@ export default function Component() {
       urlTrailer: "",
       file: undefined,
     });
-    setImagePreview(null);
     setIsDialogOpen(true);
   };
 
@@ -266,7 +211,6 @@ export default function Component() {
       }
       setIsDialogOpen(false);
       setEditingMovie(null);
-      fetchMovies(isSearchMode); // Call fetchMovies after adding or updating a movie
     } catch (error) {
       console.error("Failed to save movie:", error);
       showNotification("Error", "Failed to save movie. Please try again.", true);
@@ -277,48 +221,19 @@ export default function Component() {
     setNotification({ title, message, isError });
   };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  };
-
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder="Search movies..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="max-w-sm"
-          />
-          <Button onClick={handleSearch} className="text-white">
-            <Search className="h-4 w-4 mr-2" /> Search
-          </Button>
-        </div>
+        <Input
+          placeholder="Search movies..."
+          value={searchValue}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="max-w-sm"
+        />
         <Button onClick={handleAdd} className="text-white">
           <Plus className="mr-2 h-4 w-4" /> Add Movie
         </Button>
       </div>
-      {searchResults.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2">Search Results</h2>
-          <ul className="space-y-2">
-            {searchResults.map((movie) => (
-              <li key={movie.id} className="bg-gray-100 p-2 rounded">
-                {movie.title}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -367,11 +282,9 @@ export default function Component() {
                   <TableCell>
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(movie)}>
                       <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Edit movie</span>
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(movie.id)}>
                       <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete movie</span>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -379,31 +292,6 @@ export default function Component() {
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex justify-between items-center mt-4">
-        <div>
-          Page {currentPage} of {totalPages}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button className="text-white" onClick={handlePreviousPage} disabled={currentPage === 1}>
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              variant={currentPage === page ? "default" : "outline"}
-              className={currentPage === page ? "text-white w-8 h-8 p-0" : "text-black w-8 h-8 p-0"}
-            >
-              {page}
-            </Button>
-          ))}
-          <Button className="text-white" onClick={handleNextPage} disabled={currentPage === totalPages}>
-            Next
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
       </div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-white shadow-md">
@@ -438,7 +326,7 @@ export default function Component() {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-black text-white">
+                        <SelectContent>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name}
@@ -569,9 +457,6 @@ export default function Component() {
                             if (file) {
                               field.onChange(file);
                               setImagePreview(URL.createObjectURL(file));
-                            } else {
-                              field.onChange(undefined);
-                              setImagePreview(null);
                             }
                           }}
                         />

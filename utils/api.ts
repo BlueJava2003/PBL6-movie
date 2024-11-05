@@ -82,15 +82,7 @@ import queryString from "query-string";
 import { refreshToken } from "./refreshToken";
 
 export const sendRequest = async <T>(props: IRequest): Promise<T> => {
-  let {
-    url,
-    method,
-    body,
-    queryParams = {},
-    useCredentials = false,
-    headers = {},
-    nextOption = {},
-  } = props;
+  let { url, method, body, queryParams = {}, useCredentials = false, headers = {}, nextOption = {} } = props;
 
   const options: any = {
     method: method,
@@ -157,7 +149,7 @@ export const sendRequest = async <T>(props: IRequest): Promise<T> => {
         );
       }
     } catch (error) {
-      console.error('Error during fetch:', error);
+      console.error("Error during fetch:", error);
       // Trả về thông báo lỗi nếu fetch thất bại
       return {
         statusCode: 500,
