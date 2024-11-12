@@ -103,7 +103,7 @@ export default function AdminMovieCategoryList() {
     if (confirm("Are you sure you want to delete this category?")) {
       try {
         const cookies = parseCookies();
-        const accessToken = cookies.access_token;
+        const accessToken = cookies.accessToken;
         await sendRequest({
           url: `${process.env.customURL}/category/deleteCategory/${id}`,
           method: "DELETE",
