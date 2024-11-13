@@ -133,14 +133,15 @@ declare global {
     schedule: ISchedule;
     isDeleted: boolean;
     seatBooked: {
-    room: {
-      id: number;
-      roomName: string;
+      room: {
+        id: number;
+        roomName: string;
+      };
+      seats: ISeat[];
     };
-    seats: ISeat;
-  }
     totalPrice: number;
-    
+  }
+  
   interface IListCategory {
     id: number;
     name: string;

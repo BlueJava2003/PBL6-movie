@@ -1,168 +1,42 @@
-// "use client";
-// import { useEffect, useState } from "react";
-// import { sendRequest } from "../../../../../utils/api";
-// import { Empty, Spin, Button, notification } from "antd";
-// import ReactPaginate from "react-paginate";
-// import Link from "next/link";
+'use client';
 
-// const RoomList = () => {
-//   const [listRooms, setListRooms] = useState<IListRoom[]>([]);
-//   const [currentPage, setCurrentPage] = useState(0);
-//   const [totalPages, setTotalPages] = useState(0);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   const fetchListRoom = async (page: number) => {
-//     try {
-//       setIsLoading(true);
-//       const res = await sendRequest<IBackendRes<any>>({
-//         url: `${process.env.customURL}/ad /room/getAllRooms?page=${page}`,
-//         method: "GET",
-//       });
-
-//       if (res.data) {
-//         setListRooms(res.data.rooms);
-//         setTotalPages(res.data.totalPages);
-//       }
-//     } catch (error) {
-//       notification.error({ message: "Failed to fetch room list." });
-//       console.error(error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchListRoom(currentPage);
-//   }, [currentPage]);
-
-//   const handlePageClick = (event: { selected: number }) => {
-//     setCurrentPage(event.selected);
-//   };
-
-//   // const handleDelete = async (roomId: number) => {
-//   //   try {
-//   //     await sendRequest<IBackendRes<any>>({
-//   //       url: `${process.env.customURL}/room/deleteRoom/${roomId}`,
-//   //       method: "DELETE",
-//   //     });
-//   //     fetchListRoom(currentPage);
-//   //     notification.success({ message: "Room deleted successfully!" });
-//   //   } catch (error) {
-//   //     notification.error({ message: "Failed to delete room." });
-//   //     console.error(error);
-//   //   }
-//   // };
-
-//   return (
-//     <div className="w-full mx-auto max-w-screen-lg min-h-[600px]">
-//       <div className="font-medium mt-4 flex flex-col md:flex-row justify-between px-3 md:px-0">
-//         {isLoading ? (
-//           <div className="flex justify-center items-center my-12">
-//             <Spin size="large" />
-//           </div>
-//         ) : listRooms.length ? (
-//           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 my-12 mx-5">
-//             {listRooms.map((room) => (
-//               <div key={room.id} className="border p-4 rounded-lg shadow-md border-[#E50914]">
-//                 {/* Khung bao quanh */}
-//                 <div className="border p-4 rounded-lg">
-//                   <h2 className="text-lg font-bold">{room.name}</h2>
-//                   <p className="text-gray-600">Capacity: {room.capacity}</p>
-//                   <div className="flex justify-between mt-4">
-//                     {/* Nút "Details" */}
-//                     <Link href={`/detailRoom/${room.id}`}>
-//                       <Button className="px-[23px] py-[10px] bg-[#0e1d2f] text-white rounded-3xl border-none uppercase font-bold text-[13px]">
-//                         Details
-//                       </Button>
-//                     </Link>
-//                     {/* Nút "Edit" */}
-//                     <Link href={`/editRoom/${room.id}`}>
-//                       <Button className="px-[23px] py-[10px] bg-yellow-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]">
-//                         Edit
-//                       </Button>
-//                     </Link>
-//                     {/* Nút "Delete" */}
-//                     <Button 
-//                       //onClick={() => handleDelete(room.id)}
-//                       className="px-[23px] py-[10px] bg-red-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]"
-//                     >
-//                       Delete
-//                     </Button>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         ) : (
-//           <div className="flex justify-center items-center h-dvh">
-//             <Empty />
-//           </div>
-//         )}
-//       </div>
-
-//       {totalPages > 0 && (
-//         <ReactPaginate
-//           breakLabel="..."
-//           nextLabel="next >"
-//           onPageChange={handlePageClick}
-//           pageRangeDisplayed={5}
-//           pageCount={totalPages}
-//           previousLabel="< previous"
-//           renderOnZeroPageCount={null}
-//           containerClassName="flex justify-center my-4"
-//           pageClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-//           previousClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-//           nextClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-//           breakClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-//           activeClassName="bg-blue-500 text-white"
-//           disabledClassName="opacity-50 cursor-not-allowed"
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default RoomList;
-"use client";
 import { useEffect, useState } from "react";
-import { Empty, Spin, Button, notification } from "antd";
-import ReactPaginate from "react-paginate";
+import { sendRequest } from "../../../../../utils/api";
+import { Empty, Spin, Button, notification, Modal, Input } from "antd";
+import { parseCookies } from "nookies";  // Đảm bảo parseCookies được import
 import Link from "next/link";
 
-interface IListRoom {
-  id: number;
-  name: string;
-  capacity: number;
-}
-
 const RoomList = () => {
-  const [listRooms, setListRooms] = useState<IListRoom[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [listRooms, setListRooms] = useState<IListRoom[]>([]); // Danh sách phòng
+  const [isLoading, setIsLoading] = useState(true); // Trạng thái loading
+  const [isModalVisible, setIsModalVisible] = useState(false); // Trạng thái Modal
+  const [currentRoom, setCurrentRoom] = useState<IListRoom | null>(null); // Phòng đang được chỉnh sửa
+  const [roomName, setRoomName] = useState(""); // Tên phòng
+  const [capacity, setCapacity] = useState<number>(0); // Sức chứa phòng
 
-  // Tạo danh sách phòng mẫu
-  const mockRooms = [
-    { id: 1, name: "Phòng A", capacity: 20 },
-    { id: 2, name: "Phòng B", capacity: 30 },
-    { id: 3, name: "Phòng C", capacity: 15 },
-    { id: 4, name: "Phòng D", capacity: 25 },
-    { id: 5, name: "Phòng E", capacity: 10 },
-    { id: 6, name: "Phòng F", capacity: 50 },
-    { id: 7, name: "Phòng G", capacity: 40 },
-    { id: 8, name: "Phòng H", capacity: 35 },
-  ];
-
-  const fetchListRoom = async (page: number) => {
-    // Thay thế phần lấy dữ liệu từ API bằng dữ liệu mẫu
-    setIsLoading(true);
+  // Hàm để lấy danh sách phòng
+  const fetchListRoom = async () => {
     try {
-      setTimeout(() => {
-        const start = page * 4; // Giả sử mỗi trang có 4 phòng
-        const roomsToShow = mockRooms.slice(start, start + 4);
-        setListRooms(roomsToShow);
-        setTotalPages(Math.ceil(mockRooms.length / 4)); // Tính tổng số trang
-      }, 1000); // Giả lập thời gian loading
+      setIsLoading(true);
+      const cookies = parseCookies();
+      const token = cookies.accessToken; // Lấy token từ cookies
+
+      if (!token) {
+        notification.error({ message: "Token not found!" });
+        return;
+      }
+
+      const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.customURL}/room`,  // Endpoint GET /room
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,  // Thêm token vào header
+        },
+      });
+
+      if (res.data) {
+        setListRooms(res.data); // Lưu danh sách phòng
+      }
     } catch (error) {
       notification.error({ message: "Failed to fetch room list." });
       console.error(error);
@@ -171,17 +45,124 @@ const RoomList = () => {
     }
   };
 
-  useEffect(() => {
-    fetchListRoom(currentPage);
-  }, [currentPage]);
-
-  const handlePageClick = (event: { selected: number }) => {
-    setCurrentPage(event.selected);
+  // Hàm để mở Modal chỉnh sửa
+  const handleEdit = (room: IListRoom) => {
+    setCurrentRoom(room); // Lưu phòng hiện tại
+    setRoomName(room.name); // Thiết lập giá trị ban đầu cho input
+    setCapacity(Number(room.capacity) || 0); // Đảm bảo capacity là kiểu number, nếu không hợp lệ thì gán 0
+    setIsModalVisible(true); // Mở Modal
   };
+
+  // Hàm đóng Modal
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  // Hàm cập nhật thông tin phòng
+  const handleUpdate = async () => {
+    if (!roomName || capacity <= 0) {
+      notification.error({ message: "Please fill in all fields correctly." });
+      return;
+    }
+
+    try {
+      const cookies = parseCookies();
+      const token = cookies.accessToken; // Lấy token từ cookies
+
+      if (!token) {
+        notification.error({ message: "Token not found!" });
+        return;
+      }
+
+      // Gửi yêu cầu PUT để cập nhật phòng
+      const roomRes = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.customURL}/room/${currentRoom?.id}`,  // Đúng endpoint PUT /room/:id
+        method: "PUT",
+        body: {
+          name: roomName,
+          capacity: capacity,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Data before update:", currentRoom);
+      console.log("Data after update:", {
+        name: roomName,
+        capacity: capacity,
+      });
+
+      if (roomRes.message === "Updated successfully!") {
+        notification.success({ message: "Room updated successfully!" });
+        setIsModalVisible(false); // Đóng modal
+        fetchListRoom(); // Làm mới danh sách phòng sau khi cập nhật
+      }
+    } catch (error) {
+      notification.error({ message: "Failed to update room." });
+      console.error(error);
+    }
+  };
+
+  // Hàm để xóa Room
+  const handleDelete = (roomId: number) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this room?",
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          const cookies = parseCookies();
+          const token = cookies.accessToken; // Lấy token từ cookies
+
+          if (!token) {
+            notification.error({ message: "Token not found!" });
+            return;
+          }
+
+          // Xóa phòng
+          const roomRes = await sendRequest<IBackendRes<any>>({
+            url: `${process.env.customURL}/room/${roomId}`,
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (roomRes.message === "Delete successfully!") {
+            notification.success({ message: "Room deleted successfully!" });
+            fetchListRoom(); // Làm mới danh sách phòng sau khi xóa
+          }
+        } catch (error) {
+          notification.error({ message: "Failed to delete room." });
+          console.error(error);
+        }
+      },
+      onCancel: () => {
+        notification.info({ message: "Room deletion canceled." });
+      },
+    });
+  };
+
+  useEffect(() => {
+    fetchListRoom();  // Lấy danh sách phòng khi component mount
+  }, []);
 
   return (
     <div className="w-full mx-auto max-w-screen-lg min-h-[600px]">
       <div className="font-medium mt-4 flex flex-col md:flex-row justify-between px-3 md:px-0">
+        <div className="mb-4">
+          <Link href="/ad/room/create-room">
+            <Button 
+              className="px-[23px] py-[10px] bg-green-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]"
+            >
+              Create Room
+            </Button>
+          </Link>
+        </div>
+
         {isLoading ? (
           <div className="flex justify-center items-center my-12">
             <Spin size="large" />
@@ -189,24 +170,24 @@ const RoomList = () => {
         ) : listRooms.length ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 my-12 mx-5">
             {listRooms.map((room) => (
-              <div key={room.id} className="border p-4 rounded-lg shadow-md border-[#E50914]">
+              <div
+                key={room.id}
+                className={`border p-4 rounded-lg shadow-md border-[#E50914]`}
+              >
                 <div className="border p-4 rounded-lg">
-                  <h2 className="text-lg font-bold">{room.name}</h2>
+                  <h2 className="text-lg font-bold">Name: {room.name}</h2> {/* Hiển thị tên phòng */}
                   <p className="text-gray-600">Capacity: {room.capacity}</p>
                   <div className="flex justify-between mt-4">
-                    <Link href={`/detailRoom/${room.id}`}>
-                      <Button className="px-[23px] py-[10px] bg-[#0e1d2f] text-white rounded-3xl border-none uppercase font-bold text-[13px]">
-                        Details
-                      </Button>
-                    </Link>
-                    <Link href={`/editRoom/${room.id}`}>
-                      <Button className="px-[23px] py-[10px] bg-yellow-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]">
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button 
-                      //onClick={() => handleDelete(room.id)}
-                      className="px-[23px] py-[10px] bg-red-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]">
+                    <Button
+                      onClick={() => handleEdit(room)}
+                      className="px-[23px] py-[10px] bg-yellow-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(room.id)}
+                      className="px-[23px] py-[10px] bg-red-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]"
+                    >
                       Delete
                     </Button>
                   </div>
@@ -221,27 +202,36 @@ const RoomList = () => {
         )}
       </div>
 
-      {totalPages > 0 && (
-        <ReactPaginate
-          breakLabel="..."
-          nextLabel="next >"
-          onPageChange={handlePageClick}
-          pageRangeDisplayed={5}
-          pageCount={totalPages}
-          previousLabel="< previous"
-          renderOnZeroPageCount={null}
-          containerClassName="flex justify-center my-4"
-          pageClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          previousClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          nextClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          breakClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          activeClassName="bg-blue-500 text-white"
-          disabledClassName="opacity-50 cursor-not-allowed"
+      {/* Modal cho Edit Room */}
+      <Modal
+        title="Edit Room"
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="cancel" onClick={handleCancel}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleUpdate}>
+            Update
+          </Button>,
+        ]}
+      >
+        <Input
+          placeholder="Room Name"
+          value={roomName}
+          onChange={(e) => setRoomName(e.target.value)}
+          className="mb-4"
         />
-      )}
+        <Input
+          placeholder="Capacity"
+          type="number"
+          value={capacity}
+          onChange={(e) => setCapacity(Number(e.target.value) || 0)}
+          className="mb-4"
+        />
+      </Modal>
     </div>
   );
 };
 
 export default RoomList;
-
