@@ -1,55 +1,79 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { sendRequest } from '@/utils/api';
-import { Spin, Empty } from 'antd';
-import ReactPaginate from 'react-paginate';
-import { parseCookies } from 'nookies';  // Import parseCookies từ nookies
+import { useState, useEffect } from "react";
+import { sendRequest } from "@/utils/api";
+import { Spin, Empty } from "antd";
+import ReactPaginate from "react-paginate";
+import { parseCookies } from "nookies";
 
-// BookingList component
-const BookingList = () => {
-  const [bookings, setBookings] = useState<IBooking[]>([]); // Dữ liệu bookings
-  const [isLoading, setIsLoading] = useState(false); // Trạng thái loading
-  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
-  const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại
+interface IBooking {
+  id: number;
+  accountId: number;
+  scheduleId: number;
+  seatsBooked: [];
+  state: string;
+  totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
+  schedule: {
+    timeStart: string;
+    timeEnd: string;
+    date: string;
+    roomState: {
+      room: {
+        id: number;
+        roomName: string;
+      };
+    };
+    movie: {
+      id: number;
+      name: string;
+    };
+  };
+}
 
-  // Hàm gọi API để lấy danh sách booking cho ADMIN
-  const fetchBookings = async (page: number) => {
+interface IBackendRes<T> {
+  data: T[];
+  // Add other properties if needed
+}
+
+export default function BookingList() {
+  const [bookings, setBookings] = useState<IBooking[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const fetchBookings = async () => {
     try {
-      setIsLoading(true); // Bắt đầu loading
+      setIsLoading(true);
 
-      // Lấy token từ cookie
       const cookies = parseCookies();
-      const token = cookies.accessToken;  // Lấy token từ cookie
-
+      const token = cookies.accessToken;
       if (!token) {
         throw new Error("Token not found!");
       }
 
-      // Gửi yêu cầu GET để lấy dữ liệu bookings
-      const res = await sendRequest<IBackendRes<any>>({
-        url: `${process.env.customURL}/booking/admin/all?page=${page}`, // API lấy tất cả booking cho ADMIN
-        method: 'GET',
+      const res = await sendRequest<IBackendRes<IBooking>>({
+        url: `${process.env.customURL}/booking/admin/all`,
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,  // Thêm token vào headers
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (res.data) {
-        setBookings(res.data); // Lưu danh sách booking vào state
-        setTotalPages(res.data.totalPages); // Cập nhật tổng số trang
+        setBookings(res.data); // Set the bookings directly from res.data
       }
     } catch (error) {
-      console.error('Failed to fetch bookings:', error);
+      console.error("Failed to fetch bookings:", error);
     } finally {
-      setIsLoading(false); // Kết thúc loading
+      setIsLoading(false);
     }
   };
 
-  // Gọi hàm fetchBookings khi component mount hoặc khi trang thay đổi
   useEffect(() => {
-    fetchBookings(currentPage);
-  }, [currentPage]);
+    fetchBookings();
+  }, [currentPage]); // Fetch bookings when currentPage changes
 
   const handlePageClick = (event: { selected: number }) => {
     setCurrentPage(event.selected);
@@ -65,21 +89,17 @@ const BookingList = () => {
         ) : bookings.length ? (
           <div className="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 my-12 mx-5">
             {bookings.map((booking) => (
-              <div
-                key={booking.id}
-                className={`border p-6 rounded-lg shadow-md w-full ${booking.isDeleted ? 'bg-gray-400' : 'bg-white'}`} // Thêm điều kiện màu nền
-                style={{ marginBottom: '20px' }}
-              >
+              <div key={booking.id} className="border p-6 rounded-lg shadow-md w-full bg-white">
                 <div className="border p-4 rounded-lg">
                   <h2 className="text-lg font-bold mb-2">{booking.schedule.movie.name}</h2>
                   <p className="text-gray-600">State: {booking.state}</p>
                   <p className="text-gray-600">Date: {booking.schedule.date}</p>
-                  <p className="text-gray-600">Time: {booking.schedule.timeStart} - {booking.schedule.timeEnd}</p>
-                  <p className="text-gray-600">Room: {booking.seatBooked.room.roomName}</p>
-                  <p className="text-gray-600">Account ID: {booking.accountID}</p>
                   <p className="text-gray-600">
-                    Seats: {booking.seatBooked.seats.map((seat) => seat.name).join(', ')} {/* Hiển thị nhiều ghế ngồi */}
+                    Time: {booking.schedule.timeStart} - {booking.schedule.timeEnd}
                   </p>
+                  <p className="text-gray-600">Room: {booking.schedule.roomState.room.roomName}</p>
+                  <p className="text-gray-600">Account ID: {booking.accountId}</p>
+                  <p className="text-gray-600">Seats: {booking.seatsBooked.join(", ")}</p>
                   <p className="text-gray-600">Total Price: {booking.totalPrice} VND</p>
                 </div>
               </div>
@@ -92,7 +112,7 @@ const BookingList = () => {
         )}
       </div>
 
-      {totalPages > 0 && (  
+      {totalPages > 1 && (
         <ReactPaginate
           breakLabel="..."
           nextLabel="next >"
@@ -112,6 +132,4 @@ const BookingList = () => {
       )}
     </div>
   );
-};
-
-export default BookingList;
+}

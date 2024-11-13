@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { sendRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-
+import { parseCookies } from "nookies";
 interface IListCategory {
   id: number;
   name: string;
@@ -102,9 +102,14 @@ export default function AdminMovieCategoryList() {
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this category?")) {
       try {
+        const cookies = parseCookies();
+        const accessToken = cookies.accessToken;
         await sendRequest({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/category/deleteCategory/${id}`,
+          url: `${process.env.customURL}/category/deleteCategory/${id}`,
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
         setCategories(categories.filter((category) => category.id !== id));
         toast({
@@ -124,11 +129,17 @@ export default function AdminMovieCategoryList() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const cookies = parseCookies();
+      const accessToken = cookies.accessToken;
+      console.log("acess: ", accessToken);
       if (editingCategory) {
         await sendRequest({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/category/updateCategory/${editingCategory.id}`,
+          url: `${process.env.customURL}/category-movie/updateCategory/${editingCategory.id}`,
           method: "PUT",
           body: values,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
         setCategories(
           categories.map((category) => (category.id === editingCategory.id ? { ...category, ...values } : category))
@@ -139,10 +150,14 @@ export default function AdminMovieCategoryList() {
         });
       } else {
         const res = await sendRequest<{ data: IListCategory }>({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/category/createCategory`,
+          url: `http://localhost:3001/category-movie/createCategoryMovie`,
           method: "POST",
           body: values,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
+        console.log(res);
         if (res.data) {
           setCategories([...categories, res.data]);
         }

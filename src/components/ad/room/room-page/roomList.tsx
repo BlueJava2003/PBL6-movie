@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { sendRequest } from "../../../../../utils/api";
 import { Empty, Spin, Button, notification, Modal, Input } from "antd";
-import { parseCookies } from "nookies";  // Đảm bảo parseCookies được import
+import { parseCookies } from "nookies"; // Đảm bảo parseCookies được import
 import Link from "next/link";
 
 const RoomList = () => {
@@ -27,10 +27,10 @@ const RoomList = () => {
       }
 
       const res = await sendRequest<IBackendRes<any>>({
-        url: `${process.env.customURL}/room`,  // Endpoint GET /room
+        url: `${process.env.customURL}/room`, // Endpoint GET /room
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,  // Thêm token vào header
+          Authorization: `Bearer ${token}`, // Thêm token vào header
         },
       });
 
@@ -48,7 +48,7 @@ const RoomList = () => {
   // Hàm để mở Modal chỉnh sửa
   const handleEdit = (room: IListRoom) => {
     setCurrentRoom(room); // Lưu phòng hiện tại
-    setRoomName(room.name); // Thiết lập giá trị ban đầu cho input
+    setRoomName(room.roomName); // Thiết lập giá trị ban đầu cho input
     setCapacity(Number(room.capacity) || 0); // Đảm bảo capacity là kiểu number, nếu không hợp lệ thì gán 0
     setIsModalVisible(true); // Mở Modal
   };
@@ -67,16 +67,14 @@ const RoomList = () => {
 
     try {
       const cookies = parseCookies();
-      const token = cookies.accessToken; // Lấy token từ cookies
-
+      const token = cookies.accessToken;
       if (!token) {
         notification.error({ message: "Token not found!" });
         return;
       }
 
-      // Gửi yêu cầu PUT để cập nhật phòng
       const roomRes = await sendRequest<IBackendRes<any>>({
-        url: `${process.env.customURL}/room/${currentRoom?.id}`,  // Đúng endpoint PUT /room/:id
+        url: `${process.env.customURL}/room/${currentRoom?.id}`,
         method: "PUT",
         body: {
           name: roomName,
@@ -84,20 +82,13 @@ const RoomList = () => {
         },
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-      });
-
-      console.log("Data before update:", currentRoom);
-      console.log("Data after update:", {
-        name: roomName,
-        capacity: capacity,
       });
 
       if (roomRes.message === "Updated successfully!") {
         notification.success({ message: "Room updated successfully!" });
-        setIsModalVisible(false); // Đóng modal
-        fetchListRoom(); // Làm mới danh sách phòng sau khi cập nhật
+        setIsModalVisible(false);
+        fetchListRoom();
       }
     } catch (error) {
       notification.error({ message: "Failed to update room." });
@@ -105,7 +96,6 @@ const RoomList = () => {
     }
   };
 
-  // Hàm để xóa Room
   const handleDelete = (roomId: number) => {
     Modal.confirm({
       title: "Are you sure you want to delete this room?",
@@ -115,14 +105,13 @@ const RoomList = () => {
       onOk: async () => {
         try {
           const cookies = parseCookies();
-          const token = cookies.accessToken; // Lấy token từ cookies
+          const token = cookies.accessToken;
 
           if (!token) {
             notification.error({ message: "Token not found!" });
             return;
           }
 
-          // Xóa phòng
           const roomRes = await sendRequest<IBackendRes<any>>({
             url: `${process.env.customURL}/room/${roomId}`,
             method: "DELETE",
@@ -147,7 +136,7 @@ const RoomList = () => {
   };
 
   useEffect(() => {
-    fetchListRoom();  // Lấy danh sách phòng khi component mount
+    fetchListRoom(); // Lấy danh sách phòng khi component mount
   }, []);
 
   return (
@@ -155,9 +144,7 @@ const RoomList = () => {
       <div className="font-medium mt-4 flex flex-col md:flex-row justify-between px-3 md:px-0">
         <div className="mb-4">
           <Link href="/ad/room/create-room">
-            <Button 
-              className="px-[23px] py-[10px] bg-green-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]"
-            >
+            <Button className="px-[23px] py-[10px] bg-green-500 text-white rounded-3xl border-none uppercase font-bold text-[13px]">
               Create Room
             </Button>
           </Link>
@@ -170,12 +157,9 @@ const RoomList = () => {
         ) : listRooms.length ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 my-12 mx-5">
             {listRooms.map((room) => (
-              <div
-                key={room.id}
-                className={`border p-4 rounded-lg shadow-md border-[#E50914]`}
-              >
+              <div key={room.id} className={`border p-4 rounded-lg shadow-md border-[#E50914]`}>
                 <div className="border p-4 rounded-lg">
-                  <h2 className="text-lg font-bold">Name: {room.name}</h2> {/* Hiển thị tên phòng */}
+                  <h2 className="text-lg font-bold">Name: {room.roomName}</h2> {/* Hiển thị tên phòng */}
                   <p className="text-gray-600">Capacity: {room.capacity}</p>
                   <div className="flex justify-between mt-4">
                     <Button

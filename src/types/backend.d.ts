@@ -109,9 +109,9 @@ declare global {
   }
 
   interface IListRoom {
-    id: number; 
-    name: string; 
-    capacity: string;  
+    id: number;
+    name: string;
+    capacity: string;
   }
 
   interface IRoomState {
@@ -141,7 +141,7 @@ declare global {
     };
     totalPrice: number;
   }
-  
+
   interface IListCategory {
     id: number;
     name: string;

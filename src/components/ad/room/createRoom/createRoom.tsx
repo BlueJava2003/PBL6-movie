@@ -1,48 +1,43 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { sendRequest } from "../../../../../utils/api";
 import { Form, Input, Button, notification } from "antd";
-import { parseCookies } from "nookies"; // Import parseCookies từ nookies
+import { parseCookies } from "nookies";
+import { useRouter } from "next/navigation";
 
 const CreateRoom = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Lấy token từ cookie
   const cookies = parseCookies();
-  const token = cookies.accessToken; // Lấy token từ cookie thay vì localStorage
-
+  const token = cookies.accessToken;
+  const router = useRouter();
   const handleSubmit = async (values: IListRoom) => {
     setIsSubmitting(true);
 
     try {
-      // Log giá trị của values để kiểm tra sau khi submit
-      console.log("Form values:", values);  // Log thông tin từ form
+      console.log("Form values:", values);
 
-      // Gửi yêu cầu POST để tạo phòng mới
-      const roomResponse = await sendRequest({
-        url: `${process.env.customURL}/room`, // Endpoint POST /room
+      const roomResponse = (await sendRequest({
+        url: `${process.env.customURL}/room`,
         method: "POST",
         body: {
-          name: values.name,  // Tên phòng
-          capacity: values.capacity,  // Sức chứa phòng
+          roomName: values.roomName,
+          capacity: Number(values.capacity),
         },
         headers: {
-          'Authorization': `Bearer ${token}`,  // Thêm token vào headers
-          'Content-Type': 'application/json',  // Đảm bảo header này có mặt
-        }
-      }) as { data: { id: number } };
+          Authorization: `Bearer ${token}`,
+        },
+      })) as { data: { id: number } };
 
-      // Log kết quả phản hồi từ API
       console.log("API Response:", roomResponse);
 
-      // Kiểm tra nếu API trả về id của phòng mới
       if (!roomResponse?.data?.id) {
         throw new Error("Failed to create room");
       }
 
       notification.success({ message: "Room created successfully!" });
-
+      router.push("/ad/room");
     } catch (error) {
       console.error("Error creating room:", error);
       notification.error({ message: "Failed to create room." });
@@ -56,7 +51,7 @@ const CreateRoom = () => {
       <div className="md:w-[60%] border lg:w-[70%] w-[90%] mt-5 p-4 m-auto bg-transparent rounded-md shadow-xl lg:max-w-xl">
         <Form layout="vertical" onFinish={handleSubmit}>
           <Form.Item
-            name="name"
+            name="roomName"
             label="Room Name"
             rules={[{ required: true, message: "Please enter the room name" }]}
           >
