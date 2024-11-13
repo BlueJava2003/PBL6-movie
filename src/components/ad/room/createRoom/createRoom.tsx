@@ -1,56 +1,78 @@
 "use client";
+
 import { useState } from "react";
 import { sendRequest } from "../../../../../utils/api";
-import { Button, Input, notification } from "antd";
+import { Form, Input, Button, notification } from "antd";
+import { parseCookies } from "nookies";
+import { useRouter } from "next/navigation";
 
 const CreateRoom = () => {
-  const [roomName, setRoomName] = useState("");
-  const [capacity, setCapacity] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreateRoom = async () => {
+  const cookies = parseCookies();
+  const token = cookies.accessToken;
+  const router = useRouter();
+  const handleSubmit = async (values: IListRoom) => {
+    setIsSubmitting(true);
+
     try {
-      const res = await sendRequest<IBackendRes<any>>({
-        url: `${process.env.customURL}/room/createRoom`,
+      console.log("Form values:", values);
+
+      const roomResponse = (await sendRequest({
+        url: `${process.env.customURL}/room`,
         method: "POST",
         body: {
-          name: roomName,
-          capacity: capacity,
+          roomName: values.roomName,
+          capacity: Number(values.capacity),
         },
-      });
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })) as { data: { id: number } };
 
-      if (res.status === 200) {
-        notification.success({ message: "Room created successfully!" });
-        // Reset form or redirect if needed
+      console.log("API Response:", roomResponse);
+
+      if (!roomResponse?.data?.id) {
+        throw new Error("Failed to create room");
       }
+
+      notification.success({ message: "Room created successfully!" });
+      router.push("/ad/room");
     } catch (error) {
+      console.error("Error creating room:", error);
       notification.error({ message: "Failed to create room." });
-      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full mx-auto max-w-screen-md min-h-[400px] p-5">
-      <h2 className="text-lg font-bold mb-4">Create New Room</h2>
-      <Input
-        placeholder="Room Name"
-        value={roomName}
-        onChange={(e) => setRoomName(e.target.value)}
-        className="mb-4"
-      />
-      <Input
-        placeholder="Capacity"
-        type="number"
-        value={capacity}
-        onChange={(e) => setCapacity(e.target.value)}
-        className="mb-4"
-      />
-      <Button 
-        type="primary" 
-        onClick={handleCreateRoom}
-        className="bg-[#0e1d2f] text-white rounded-3xl border-none uppercase font-bold"
-      >
-        Create Room
-      </Button>
+    <div className="w-full mx-auto max-w-screen-lg min-h-[600px]">
+      <div className="md:w-[60%] border lg:w-[70%] w-[90%] mt-5 p-4 m-auto bg-transparent rounded-md shadow-xl lg:max-w-xl">
+        <Form layout="vertical" onFinish={handleSubmit}>
+          <Form.Item
+            name="roomName"
+            label="Room Name"
+            rules={[{ required: true, message: "Please enter the room name" }]}
+          >
+            <Input placeholder="Enter room name" />
+          </Form.Item>
+
+          <Form.Item
+            name="capacity"
+            label="Capacity"
+            rules={[{ required: true, message: "Please enter the room capacity" }]}
+          >
+            <Input type="number" placeholder="Enter room capacity" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={isSubmitting}>
+              Create Room
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
     </div>
   );
 };

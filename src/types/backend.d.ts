@@ -137,7 +137,7 @@ declare global {
         id: number;
         roomName: string;
       };
-      seats: ISeat;
+      seats: ISeat[];
     };
     totalPrice: number;
   }
