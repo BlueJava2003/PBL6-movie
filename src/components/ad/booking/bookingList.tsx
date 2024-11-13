@@ -5,12 +5,16 @@ import { sendRequest } from "@/utils/api";
 import { Spin, Empty } from "antd";
 import ReactPaginate from "react-paginate";
 import { parseCookies } from "nookies";
+import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CalendarIcon, ClockIcon, UserIcon, CreditCardIcon, SofaIcon } from "lucide-react";
 
 interface IBooking {
   id: number;
   accountId: number;
   scheduleId: number;
-  seatsBooked: [];
+  seatsBooked: string[];
   state: string;
   totalPrice: number;
   createdAt: string;
@@ -62,7 +66,7 @@ export default function BookingList() {
       });
 
       if (res.data) {
-        setBookings(res.data); // Set the bookings directly from res.data
+        setBookings(res.data);
       }
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
@@ -73,60 +77,101 @@ export default function BookingList() {
 
   useEffect(() => {
     fetchBookings();
-  }, [currentPage]); // Fetch bookings when currentPage changes
+  }, [currentPage]);
 
   const handlePageClick = (event: { selected: number }) => {
     setCurrentPage(event.selected);
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, "MMM dd, yyyy");
+  };
+
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(":");
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    return format(date, "h:mm a");
+  };
+
+  const getStatusColor = (state: string) => {
+    switch (state.toLowerCase()) {
+      case "confirmed":
+        return "bg-green-500";
+      case "pending":
+        return "bg-yellow-500";
+      case "cancelled":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
   return (
-    <div className="w-full mx-auto max-w-screen-lg min-h-[600px]">
-      <div className="font-medium mt-4 flex flex-col md:flex-row justify-between px-3 md:px-0">
-        {isLoading ? (
-          <div className="flex justify-center items-center my-12">
-            <Spin size="large" />
-          </div>
-        ) : bookings.length ? (
-          <div className="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 my-12 mx-5">
-            {bookings.map((booking) => (
-              <div key={booking.id} className="border p-6 rounded-lg shadow-md w-full bg-white">
-                <div className="border p-4 rounded-lg">
-                  <h2 className="text-lg font-bold mb-2">{booking.schedule.movie.name}</h2>
-                  <p className="text-gray-600">State: {booking.state}</p>
-                  <p className="text-gray-600">Date: {booking.schedule.date}</p>
-                  <p className="text-gray-600">
-                    Time: {booking.schedule.timeStart} - {booking.schedule.timeEnd}
-                  </p>
-                  <p className="text-gray-600">Room: {booking.schedule.roomState.room.roomName}</p>
-                  <p className="text-gray-600">Account ID: {booking.accountId}</p>
-                  <p className="text-gray-600">Seats: {booking.seatsBooked.join(", ")}</p>
-                  <p className="text-gray-600">Total Price: {booking.totalPrice} VND</p>
+    <div className="w-full mx-auto max-w-screen-xl min-h-[600px] p-4">
+      <h1 className="text-3xl font-bold mb-6 text-center">Booking List</h1>
+      {isLoading ? (
+        <div className="flex justify-center items-center my-12">
+          <Spin size="large" />
+        </div>
+      ) : bookings.length ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 my-12">
+          {bookings.map((booking) => (
+            <Card key={booking.id} className="w-full">
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span className="truncate">{booking.schedule.movie.name}</span>
+                  <Badge className={`${getStatusColor(booking.state)} text-white`}>{booking.state}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <div className="flex items-center">
+                  <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                  <span>{formatDate(booking.schedule.date)}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex justify-center items-center h-dvh">
-            <Empty />
-          </div>
-        )}
-      </div>
+                <div className="flex items-center">
+                  <SofaIcon className="mr-2 h-4 w-4 opacity-70" />
+                  <span>{booking.schedule.roomState.room.roomName}</span>
+                </div>
+                <div className="flex items-center">
+                  <UserIcon className="mr-2 h-4 w-4 opacity-70" />
+                  <span>Account ID: {booking.accountId}</span>
+                </div>
+                <div className="flex items-center">
+                  <SofaIcon className="mr-2 h-4 w-4 opacity-70" />
+                  <span>Seats: {booking.seatsBooked.join(", ")}</span>
+                </div>
+                <div className="flex items-center">
+                  <CreditCardIcon className="mr-2 h-4 w-4 opacity-70" />
+                  <span>{booking.totalPrice.toLocaleString()} VND</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="flex justify-center items-center h-[60vh]">
+          <Empty description="No bookings found" />
+        </div>
+      )}
 
       {totalPages > 1 && (
         <ReactPaginate
           breakLabel="..."
-          nextLabel="next >"
+          nextLabel="Next >"
           onPageChange={handlePageClick}
           pageRangeDisplayed={5}
           pageCount={totalPages}
-          previousLabel="< previous"
+          previousLabel="< Previous"
           renderOnZeroPageCount={null}
-          containerClassName="flex justify-center my-4"
-          pageClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          previousClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          nextClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          breakClassName="mx-2 px-3 py-2 bg-gray-200 rounded-md cursor-pointer"
-          activeClassName="bg-blue-500 text-white"
+          containerClassName="flex justify-center items-center space-x-2 mt-8"
+          pageClassName="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer"
+          previousClassName="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer"
+          nextClassName="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer"
+          breakClassName="px-3 py-2"
+          activeClassName="bg-primary text-primary-foreground"
           disabledClassName="opacity-50 cursor-not-allowed"
         />
       )}
