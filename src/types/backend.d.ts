@@ -128,18 +128,26 @@ declare global {
 
   interface IBooking {
     id: number;
+    accountId: number;
+    scheduleId: number;
+    seatsBooked: string[];
     state: string;
-    accountID: number;
-    schedule: ISchedule;
-    isDeleted: boolean;
-    seatBooked: {
-      room: {
-        id: number;
-        roomName: string;
-      };
-      seats: ISeat[];
-    };
     totalPrice: number;
+    createdAt: string;
+    updatedAt: string;
+    schedule: {
+      date: string;
+      roomState: {
+        room: {
+          id: number;
+          roomName: string;
+        };
+      };
+      movie: {
+        id: number;
+        name: string;
+      };
+    };
   }
 
   interface IListCategory {

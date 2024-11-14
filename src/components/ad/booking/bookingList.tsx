@@ -6,9 +6,9 @@ import { Spin, Empty } from "antd";
 import ReactPaginate from "react-paginate";
 import { parseCookies } from "nookies";
 import { format } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, ClockIcon, UserIcon, CreditCardIcon, SofaIcon } from "lucide-react";
+import { BookingStatistics } from "@/components/ad/booking/BookingStatistics";
 
 interface IBooking {
   id: number;
@@ -20,8 +20,6 @@ interface IBooking {
   createdAt: string;
   updatedAt: string;
   schedule: {
-    timeStart: string;
-    timeEnd: string;
     date: string;
     roomState: {
       room: {
@@ -98,7 +96,7 @@ export default function BookingList() {
 
   const getStatusColor = (state: string) => {
     switch (state.toLowerCase()) {
-      case "confirmed":
+      case "success":
         return "bg-green-500";
       case "pending":
         return "bg-yellow-500";
@@ -112,45 +110,45 @@ export default function BookingList() {
   return (
     <div className="w-full mx-auto max-w-screen-xl min-h-[600px] p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Booking List</h1>
+
+      <BookingStatistics bookings={bookings} />
+
       {isLoading ? (
         <div className="flex justify-center items-center my-12">
           <Spin size="large" />
         </div>
       ) : bookings.length ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 my-12">
-          {bookings.map((booking) => (
-            <Card key={booking.id} className="w-full">
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span className="truncate">{booking.schedule.movie.name}</span>
+        <Table className="my-12">
+          <TableCaption>A list of all bookings</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Movie</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Room</TableHead>
+              <TableHead>Account ID</TableHead>
+              <TableHead>Seats</TableHead>
+              <TableHead>Total Price</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {bookings.map((booking) => (
+              <TableRow key={booking.id}>
+                <TableCell>{booking.id}</TableCell>
+                <TableCell>{booking.schedule.movie.name}</TableCell>
+                <TableCell>{formatDate(booking.schedule.date)}</TableCell>
+                <TableCell>{booking.schedule.roomState.room.roomName}</TableCell>
+                <TableCell>{booking.accountId}</TableCell>
+                <TableCell>{booking.seatsBooked.join(", ")}</TableCell>
+                <TableCell>{booking.totalPrice.toLocaleString()} VND</TableCell>
+                <TableCell>
                   <Badge className={`${getStatusColor(booking.state)} text-white`}>{booking.state}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-2">
-                <div className="flex items-center">
-                  <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
-                  <span>{formatDate(booking.schedule.date)}</span>
-                </div>
-                <div className="flex items-center">
-                  <SofaIcon className="mr-2 h-4 w-4 opacity-70" />
-                  <span>{booking.schedule.roomState.room.roomName}</span>
-                </div>
-                <div className="flex items-center">
-                  <UserIcon className="mr-2 h-4 w-4 opacity-70" />
-                  <span>Account ID: {booking.accountId}</span>
-                </div>
-                <div className="flex items-center">
-                  <SofaIcon className="mr-2 h-4 w-4 opacity-70" />
-                  <span>Seats: {booking.seatsBooked.join(", ")}</span>
-                </div>
-                <div className="flex items-center">
-                  <CreditCardIcon className="mr-2 h-4 w-4 opacity-70" />
-                  <span>{booking.totalPrice.toLocaleString()} VND</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       ) : (
         <div className="flex justify-center items-center h-[60vh]">
           <Empty description="No bookings found" />

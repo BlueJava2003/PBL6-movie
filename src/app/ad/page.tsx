@@ -1,7 +1,7 @@
-import AdminMovieList from "@/components/ad/movie/AdminMovieTable";
+import AdminHomepage from "@/components/AdminLayout";
 
 const MoviePage = async () => {
-  return <AdminMovieList />;
+  return <AdminHomepage />;
 };
 
 export default MoviePage;
