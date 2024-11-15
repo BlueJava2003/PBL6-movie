@@ -102,7 +102,7 @@ const Schedule = ({ dailyDates }: IProps) => {
             className="text-lg mb-1 rounded-[50%] px-[8px] py-[8px] cursor-pointer hover:bg-[#ff5400] hover:text-white transition-colors duration-300 flex items-center justify-center"
           >
             <img
-              className="lg:h-8 lg:w-8 "
+              className="lg:h-8 lg:w-8 h-5 w-5"
               src="/assets/next_icon.png"
               alt="Next"
             />
