@@ -245,7 +245,13 @@ export default function Component() {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        setMovies(movies.map((movie) => (movie.id === editingMovie.id ? { ...movie, ...values } : movie)));
+        setMovies(
+          movies.map((movie) =>
+            movie.id === editingMovie.id
+              ? { ...movie, ...values, releaseDate: values.releaseDate.toISOString() }
+              : movie
+          )
+        );
         showNotification("Success", "Movie updated successfully.", false);
       } else {
         const res = await fetch(`${process.env.customURL}/movie/createMovie`, {
