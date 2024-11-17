@@ -7,7 +7,7 @@ declare global {
     timeStart: string;
     timeEnd: string;
     room: {
-      roomId: number;
+      id: number;
       roomName: string;
     };
     movie: {
@@ -110,7 +110,7 @@ declare global {
 
   interface IListRoom {
     id: number;
-    name: string;
+    roomName: string;
     capacity: string;
   }
 
