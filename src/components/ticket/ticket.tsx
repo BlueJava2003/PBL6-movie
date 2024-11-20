@@ -25,7 +25,7 @@ const Ticket = () => {
       price: infoBookingObj.price,
     };
     const encodedData = encodeURIComponent(JSON.stringify(ticketData));
-    return `http://192.168.1.6:3000/ticket-info?data=${encodedData}`;
+    return `http://192.168.1.14:3000/ticket-info?data=${encodedData}`;
   }, [infoBookingObj]);
 
   return (

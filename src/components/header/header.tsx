@@ -1,23 +1,21 @@
 "use client";
-// IMPORT HOOKS
-import React, { useState, useEffect, memo } from "react";
-// IMPORT UI
+
+import React, { useState, memo } from "react";
 import Link from "next/link";
-// import { Transition } from '@headlessui/react';
-import { Menu, MenuHandler, MenuList, MenuItem, Button } from "@material-tailwind/react";
 import { Dropdown, MenuProps, Space } from "antd";
-import { DownOutlined, SmileOutlined } from "@ant-design/icons";
+import { DownOutlined } from "@ant-design/icons";
 import { useCookies } from "next-client-cookies";
 import { useUserContext } from "@/lib/user.wrapper";
 import { sendRequest } from "../../../utils/api";
 import { useRouter } from "next/navigation";
+
 function Header() {
-  // DEFINE
   const cookies = useCookies();
   const accessToken = cookies.get("accessToken");
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, setCurrentUser } = useUserContext() as IUserContext;
   const router = useRouter();
+
   const handleLogout = async () => {
     const res = await sendRequest<IBackendRes<IUser>>({
       url: `${process.env.customURL}/auth/logout`,
@@ -44,6 +42,16 @@ function Header() {
         <div className="px-5 text-left text-[18px] font-semibold">
           <Link href="#" className="text-primary hover:text-[#E50914]">
             Profile
+          </Link>
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <div className="px-5 text-left text-[18px] font-semibold">
+          <Link href={`/history/2`} className="text-primary hover:text-[#E50914]">
+            Lịch sử đặt vé
           </Link>
         </div>
       ),
