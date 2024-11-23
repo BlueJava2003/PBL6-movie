@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Grid, Film, Home, RockingChairIcon as Chair } from "lucide-react";
+import { BookOpen, Grid, Film, Home, RockingChairIcon as Chair, Bed, DoorClosedIcon } from "lucide-react";
 
 const navItems = [
   { name: "Booking", url: "/ad/booking", icon: BookOpen },
@@ -9,6 +9,8 @@ const navItems = [
   { name: "Movie", url: "/ad/movie", icon: Film },
   { name: "Room", url: "/ad/room", icon: Home },
   { name: "Seat", url: "/ad/seat", icon: Chair },
+  { name: "Room State", url: "/ad/room-state", icon: Bed },
+  { name: "Schedule", url: "/ad/schedule", icon: DoorClosedIcon },
 ];
 
 export default function AdminDashboard() {
