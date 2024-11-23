@@ -1,4 +1,4 @@
-import History from '@/components/history/history';
+import History from "@/components/history/history";
 
 const HistoryPage = () => {
   return <History />;
