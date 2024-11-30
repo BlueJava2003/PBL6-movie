@@ -28,9 +28,9 @@ const Payment = () => {
 
   const handlePayment = async () => {
     setIsLoading(true);
-    router.push("/ticket");
+    // router.push("/ticket");
     localStorage.removeItem("schedule");
-    const res = await sendRequest<IBackendRes<IUser>>({
+    const res = await sendRequest<IBackendRes<any>>({
       url: `${process.env.customURL}/booking`,
       method: "POST",
       headers: {
@@ -61,7 +61,8 @@ const Payment = () => {
       router.refresh();
       setIsLoading(false);
 
-      return router.push("/schedule");
+      return router.push(res.data);
+      // return router.push("/schedule");
     } else {
       notification.error({ message: "Có lỗi khi đặt ghế, vui lòng thử lại!" });
       setInfoBooking({
