@@ -21,6 +21,7 @@ interface IUser {
 
 interface DecodedToken {
   role: string;
+  email: string;
   // Add other properties from your JWT token here
 }
 
@@ -68,13 +69,18 @@ export default function Component() {
       setCurrentUser({
         accessToken: res.data.accessToken,
         refresh_token: res.data.refresh_token,
-        name: "Nguyen",
+        name: "Your account",
       });
 
       // Decode the JWT token
       const decodedToken = jwtDecode(res.data.accessToken) as DecodedToken;
 
-      if (decodedToken.role === "ADMIN") {
+      if (
+        decodedToken.role === "ADMIN" &&
+        decodedToken.email !== "tphuongnam98@gmail.com" &&
+        decodedToken.email !== "trungnghia@gmail.com" &&
+        decodedToken.email !== "minhtriet@gmail.com"
+      ) {
         router.push("/ad");
       } else if (localStorage.getItem("scheduleId")) {
         localStorage.removeItem("scheduleId");

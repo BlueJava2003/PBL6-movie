@@ -40,6 +40,7 @@ const Payment = () => {
     });
 
     if (res.data) {
+      notification.success({ message: res.data });
       notification.success({ message: "Bạn đã đặt vé thành công!" });
       setInfoBooking({
         seatNames: [],
@@ -60,7 +61,7 @@ const Payment = () => {
       });
       router.refresh();
       setIsLoading(false);
-
+      console.log("res.data: ", res.data);
       return router.push(res.data);
       // return router.push("/schedule");
     } else {

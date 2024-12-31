@@ -29,7 +29,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
       setCurrentUser({
         accessToken: accessTk,
         refresh_token: refreshTk,
-        name: "Nguyen",
+        name: "Your account",
       });
     }
   }, [accessTk, refreshTk]);

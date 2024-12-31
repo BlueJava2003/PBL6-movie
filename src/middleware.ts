@@ -10,6 +10,7 @@ const isAdminRoute = (pathname: string) => pathname.startsWith("/ad");
 
 interface DecodedToken {
   role?: string;
+  email?: string;
   // Add other properties from your JWT token here
 }
 
@@ -33,6 +34,15 @@ export async function middleware(req: NextRequest) {
 
     try {
       const decodedToken = jwtDecode(accessToken.value) as DecodedToken;
+
+      if (
+        decodedToken.email === "tphuongnam98@gmail.com" ||
+        decodedToken.email === "trungnghia@gmail.com" ||
+        decodedToken.email === "minhtriet@gmail.com"
+      ) {
+        return NextResponse.redirect(new URL("/error/unauthorized", req.url));
+      }
+
       if (decodedToken.role !== "ADMIN") {
         return NextResponse.redirect(new URL("/error/unauthorized", req.url));
       }
