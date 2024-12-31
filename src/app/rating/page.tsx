@@ -1,5 +1,5 @@
 import MovieRating from "@/components/rating/MovieRating";
 
 export default function page() {
-  return <MovieRating />;
+  return <MovieRating movieId={1} />;
 }
